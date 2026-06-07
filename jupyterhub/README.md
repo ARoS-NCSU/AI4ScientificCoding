@@ -1,0 +1,197 @@
+#  JupyterHub Deployment 
+
+> Multi-user JupyterHub with GitHub OAuth authentication, GPU-accelerated PyTorch containers, and isolated environments per user. Deployed on Jetstream2 
+
+---
+
+## 📌 Quick Access
+
+| | |
+|---|---|
+| **URL** | http://149.165.172.98:8000 |
+| **Login** | GitHub OAuth (NCSU-NNDL-Spring26 org) |
+| **GPU** | NVIDIA GRID A100X-10C (10GB, CUDA 12.2) |
+| **Notebook** | PyTorch + JupyterLab (Python 3.12) |
+
+---
+
+## Architecture
+Student Browser
+│
+▼
+JupyterHub (port 8000)  ←── GitHub OAuth Authentication
+│
+▼
+DockerSpawner
+│
+▼
+Personal PyTorch Container (per user)
+│
+▼
+NVIDIA GRID A100X-10C GPU (CUDA 12.2)
+
+Each student gets a **fully isolated** JupyterLab environment with GPU access.
+
+---
+
+## ⚙️ Initial Setup
+
+### Prerequisites
+- Docker installed on host VM
+- GitHub OAuth App credentials
+- VM with NVIDIA GPU + CUDA drivers
+
+### Step 1: Create Docker Network
+```bash
+docker network create jupyterhub-network
+```
+
+### Step 2: Build Complete JupyterHub Image
+```bash
+docker build -f Dockerfile -t jupyterhub-complete:latest .
+```
+
+### Step 3: Create Config File
+```bash
+mkdir -p ~/jupyterhub-config
+cp jupyterhub_config.py ~/jupyterhub-config/jupyterhub_config.py
+# Edit the file and add your Client ID and Secret
+```
+
+### Step 4: Run JupyterHub
+```bash
+docker run -d \
+  --name jupyterhub \
+  --network jupyterhub-network \
+  -p 8000:8000 \
+  -v ~/jupyterhub-config:/etc/jupyterhub \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v jupyterhub-data:/data \
+  jupyterhub-complete:latest \
+  jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
+```
+
+### Step 5: Verify
+```bash
+docker ps | grep jupyterhub
+# Visit http://149.165.172.98:8000
+```
+
+---
+
+## 🔐 GitHub OAuth Setup
+
+### Create OAuth App
+1. Go to: https://github.com/organizations/NCSU-NNDL-Spring26/settings/applications
+2. Click **New OAuth App**
+3. Fill in the following fields:
+
+| Field | Value |
+|-------|-------|
+| Application name | Jetstream Classroom |
+| Homepage URL | http://149.165.172.98:8000 |
+| Authorization callback URL | http://149.165.172.98:8000/hub/oauth_callback |
+
+4. Click **Register application**
+5. Click **Generate a new client secret**
+6. Save the **Client ID** and **Client Secret** securely
+
+### Add Credentials to Config
+Open `~/jupyterhub-config/jupyterhub_config.py` and update:
+```python
+c.GitHubOAuthenticator.client_id = "YOUR_CLIENT_ID"
+c.GitHubOAuthenticator.client_secret = "YOUR_CLIENT_SECRET"
+```
+
+> ⚠️ **Never commit your Client Secret to GitHub!**
+
+---
+
+## 👥 Managing Users
+
+### Adding New Users
+Open `~/jupyterhub-config/jupyterhub_config.py` and add the GitHub username:
+
+```python
+c.Authenticator.allowed_users = [
+    "lobaton",
+    "darrendbutler",
+    "qsamson",
+    "new-github-username",   # ← Add new user here
+]
+```
+
+### Apply Changes
+```bash
+docker restart jupyterhub
+```
+
+### Removing a User
+Simply remove their username from the list above and restart.
+
+---
+
+## 🔧 Common Commands
+
+```bash
+# Check JupyterHub status
+docker ps | grep jupyterhub
+
+# View logs
+docker logs jupyterhub --tail 50
+
+# Restart JupyterHub
+docker restart jupyterhub
+
+# Stop JupyterHub
+docker stop jupyterhub
+
+# List active user containers
+docker ps | grep jupyter-
+```
+
+---
+
+## ✅ Verify GPU Access
+
+Inside any user's JupyterLab terminal:
+```python
+python -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0))"
+# Expected: True / GRID A100X-10C
+
+nvidia-smi
+# Expected: GRID A100X-10C, 10240MiB
+```
+
+---
+
+## 📁 Files
+
+| File | Purpose |
+|------|---------|
+| `README.md` | This documentation |
+| `Dockerfile` | Complete JupyterHub image with all dependencies |
+| `jupyterhub_config.py` | Configuration template (no secrets) |
+
+---
+
+## ⚠️ Security Notes
+
+- Never commit `client_secret` to GitHub
+- HTTPS is strongly recommended for production (HTTP warning shown on login)
+- Only whitelisted GitHub users can access the Hub
+- Each user's container is fully isolated
+
+---
+
+## 👨‍💻 Maintainers
+
+| Name | GitHub | Role |
+|------|--------|------|
+| Samson Quaye | @qsamson | Lead Developer |
+| Ren Butler | @darrendbutler | Infrastructure |
+| Prof. Edgar Lobaton | @lobaton | Principal Investigator |
+
+---
+
+*SHI-NAIRR SRP 2026 — NC State University, ECE Department*
