@@ -18,24 +18,6 @@
 ---
 
 ## 🏗️ Architecture
-Student Browser
-│
-▼
-JupyterHub  ──  GitHub OAuth Authentication
-│
-▼
-DockerSpawner  ──  pytorch-cline:latest  (one container per user)
-│
-├──  JupyterLab     (port 8888)   Notebooks and data science
-├──  code-server    (port 8080)   VS Code with Cline extension
-└──  Cline CLI                    AI assistant in terminal
-│
-▼
-Jetstream LLM API
-├──  Kimi-K2.6       (default)
-└──  Llama-4-Scout   (fallback)
-
-When a student logs in, JupyterHub spawns a personal container. All three tools share the same Jetstream LLM backend at no cost to students.
 
 ---
 
