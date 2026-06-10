@@ -17,7 +17,14 @@
 
 ---
 
+
 ## 🏗️ Architecture
+
+![Integration Architecture](Integration-Architecture.png)
+
+This architecture provides each student with an isolated, browser-accessible AI development workspace. By combining notebook-based analysis, VS Code-style development, terminal-based AI assistance, and a shared LLM backend, the environment supports reproducible coding, data science workflows, and AI-assisted learning without requiring students to install local tools.
+
+---
 
 ---
 
