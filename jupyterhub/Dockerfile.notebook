@@ -1,0 +1,9 @@
+FROM quay.io/jupyter/pytorch-notebook:cuda12-python-3.12
+
+USER root
+
+COPY jupyter-ai /tmp/jupyter-ai
+RUN pip install --no-cache-dir "jupyter-ai>=3.0.0" /tmp/jupyter-ai && \
+    rm -rf /tmp/jupyter-ai
+
+USER ${NB_UID}

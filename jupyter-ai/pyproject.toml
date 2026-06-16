@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jupyter-ai-jupyternaut"
+version = "0.1.0"
+description = "Custom Jupyter AI persona for AI4ScientificCoding JupyterHub users"
+requires-python = ">=3.10"
+dependencies = [
+	"jupyter-ai>=3.0.0",
+]
+
+[project.entry-points."jupyter_ai.personas"]
+debug_persona = "jupyter_ai_jupyternaut.persona:DebugPersona"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["jupyter_ai_jupyternaut*"]
+

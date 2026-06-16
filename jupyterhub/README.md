@@ -12,7 +12,7 @@
 | **URL (SSL)** | https://srp-jupyterhub.nairr240257.projects.jetstream-cloud.org/ |
 | **Login** | GitHub OAuth (NCSU-NNDL-Spring26 org) |
 | **GPU** | NVIDIA GRID A100X-10C (10GB, CUDA 12.2) |
-| **Notebook** | PyTorch + JupyterLab (Python 3.12) |
+| **Notebook** | PyTorch + JupyterLab + Jupyter AI (Python 3.12) |
 
 ---
 
@@ -47,19 +47,24 @@ Each student gets a **fully isolated** JupyterLab environment with GPU access.
 docker network create jupyterhub-network
 ```
 
-### Step 2: Build Complete JupyterHub Image
+### Step 2: Build the Notebook Image with Jupyter AI
+```bash
+docker build -f jupyterhub/Dockerfile.notebook -t ai4scientificcoding-notebook:latest .
+```
+
+### Step 3: Build Complete JupyterHub Image
 ```bash
 docker build -f Dockerfile -t jupyterhub-complete:latest .
 ```
 
-### Step 3: Create Config File
+### Step 4: Create Config File
 ```bash
 mkdir -p ~/jupyterhub-config
 cp jupyterhub_config.py ~/jupyterhub-config/jupyterhub_config.py
 # Edit the file and add your Client ID and Secret
 ```
 
-### Step 4: Run JupyterHub
+### Step 5: Run JupyterHub
 ```bash
 docker run -d \
   --name jupyterhub \
@@ -72,7 +77,7 @@ docker run -d \
   jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
 ```
 
-### Step 5: Verify
+### Step 6: Verify
 ```bash
 docker ps | grep jupyterhub
 # Visit http://149.165.172.98:8000
@@ -172,6 +177,7 @@ nvidia-smi
 |------|---------|
 | `README.md` | This documentation |
 | `Dockerfile` | Complete JupyterHub image with all dependencies |
+| `Dockerfile.notebook` | User notebook image with Jupyter AI and the custom persona package |
 | `jupyterhub_config.py` | Configuration template (no secrets) |
 
 ---

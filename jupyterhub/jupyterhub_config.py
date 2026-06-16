@@ -26,7 +26,7 @@ c.JupyterHub.hub_connect_ip = "jupyterhub"
 
 # --- DockerSpawner Configuration ---
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
-c.DockerSpawner.image = "quay.io/jupyter/pytorch-notebook:cuda12-python-3.12"
+c.DockerSpawner.image = "ai4scientificcoding-notebook:latest"
 c.DockerSpawner.network_name = "jupyterhub-network"
 c.DockerSpawner.remove = True
 c.DockerSpawner.http_timeout = 300
