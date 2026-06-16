@@ -9,6 +9,7 @@
 | | |
 |---|---|
 | **URL** | http://149.165.172.98:8000 |
+| **URL (SSL)** | https://srp-jupyterhub.nairr240257.projects.jetstream-cloud.org/ |
 | **Login** | GitHub OAuth (NCSU-NNDL-Spring26 org) |
 | **GPU** | NVIDIA GRID A100X-10C (10GB, CUDA 12.2) |
 | **Notebook** | PyTorch + JupyterLab (Python 3.12) |
