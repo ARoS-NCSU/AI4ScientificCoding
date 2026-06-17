@@ -1,37 +1,32 @@
 #!/bin/bash
-# Start a new Docker container in detached (background) mode
+set -euo pipefail
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd -- "${SCRIPT_DIR}/.." && pwd)
+ENV_FILE=${ENV_FILE:-"${REPO_ROOT}/.env"}
+HUB_IMAGE=${HUB_IMAGE:-jupyterhub-complete:latest}
+HUB_NAME=${HUB_NAME:-jupyterhub}
+HUB_NETWORK=${HUB_NETWORK:-jupyterhub-network}
+HUB_PORT=${HUB_PORT:-8000}
+
+if ! docker network inspect "${HUB_NETWORK}" >/dev/null 2>&1; then
+  docker network create "${HUB_NETWORK}"
+fi
+
+if docker ps -a --format "{{.Names}}" | grep -qx "${HUB_NAME}"; then
+  echo "Container ${HUB_NAME} already exists. Remove it first with: docker rm -f ${HUB_NAME}"
+  exit 1
+fi
+
 docker run -d \
-
-  # Assign the container the name "jupyterhub"
-  --name jupyterhub \
-
-  # Connect the container to the Docker network used by JupyterHub
-  # and the notebook containers it spawns
-  --network jupyterhub-network \
-
-  # Map port 8000 on the host machine to port 8000 inside the container
-  # so users can access JupyterHub via http://<host>:8000
-  -p 8000:8000 \
-
-  # Load environment variables from the specified .env file
-  # (e.g., OAuth credentials, API keys, configuration settings)
-  --env-file ~/AI4ScientificCoding/.env \
-
-  # Mount the local JupyterHub configuration directory into the container
-  # so jupyterhub_config.py and related files can be edited without rebuilding
-  -v ~/AI4ScientificCoding/jupyterhub:/etc/jupyterhub \
-
-  # Mount the host Docker socket into the container
-  # allowing DockerSpawner to create, start, stop, and manage notebook containers
+  --name "${HUB_NAME}" \
+  --network "${HUB_NETWORK}" \
+  -p "${HUB_PORT}:8000" \
+  --env-file "${ENV_FILE}" \
+  -v "${SCRIPT_DIR}:/etc/jupyterhub" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-
-  # Mount a persistent Docker volume for JupyterHub data
-  # so data survives container restarts and upgrades
   -v jupyterhub-data:/data \
-
-  # Docker image to run
-  jupyterhub-complete:latest \
-
-  # Command executed inside the container:
-  # start JupyterHub using the specified configuration file
+  "${HUB_IMAGE}" \
   jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
+
+echo "JupyterHub started at http://localhost:${HUB_PORT}"

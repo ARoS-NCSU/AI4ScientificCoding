@@ -42,6 +42,18 @@ Each student gets a **fully isolated** JupyterLab environment with GPU access.
 - GitHub OAuth App credentials
 - VM with NVIDIA GPU + CUDA drivers
 
+### Step 0: Set environment variables
+Create a `.env` file at repo root and set environment variables
+
+```
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+OAUTH_CALLBACK_URL=...
+DOCKER_NOTEBOOK_IMAGE=ai4scientificcoding-notebook:latest
+# Optional shared Jupyter AI provider key, if all users should use the same key:
+# OPENAI_API_KEY=...
+```
+
 ### Step 1: Create Docker Network
 ```bash
 docker network create jupyterhub-network
@@ -54,13 +66,13 @@ docker build -f jupyterhub/Dockerfile.notebook -t ai4scientificcoding-notebook:l
 
 ### Step 3: Build Complete JupyterHub Image
 ```bash
-docker build -f Dockerfile -t jupyterhub-complete:latest .
+docker build -f jupyterhub/Dockerfile -t jupyterhub-complete:latest .
 ```
 
 ### Step 4: Create Config File
 ```bash
 mkdir -p ~/jupyterhub-config
-cp jupyterhub_config.py ~/jupyterhub-config/jupyterhub_config.py
+cp jupyterhub/jupyterhub_config.py ~/jupyterhub-config/jupyterhub_config.py
 # Edit the file and add your Client ID and Secret
 ```
 
@@ -171,6 +183,16 @@ nvidia-smi
 
 ---
 
+## ✅ Verify Jupyter AI Access
+
+Inside any user JupyterLab terminal:
+```bash
+python -c "import jupyter_ai; print(jupyter_ai.__version__)"
+# Expected: prints the installed Jupyter AI version
+```
+
+---
+
 ## 📁 Files
 
 | File | Purpose |
@@ -178,6 +200,7 @@ nvidia-smi
 | `README.md` | This documentation |
 | `Dockerfile` | Complete JupyterHub image with all dependencies |
 | `Dockerfile.notebook` | User notebook image with Jupyter AI and the custom persona package |
+| `notebook-requirements.txt` | Python packages installed into spawned user notebook containers |
 | `jupyterhub_config.py` | Configuration template (no secrets) |
 
 ---

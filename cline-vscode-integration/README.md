@@ -13,7 +13,7 @@
 | **LLM API** | https://llm.jetstream-cloud.org/v1 |
 | **Default Model** | Kimi-K2.6 |
 | **Fallback Model** | Llama-4-Scout |
-| **API Key** | jetstream |
+| **API Key** | Set with `CLINE_API_KEY` in `.env` |
 
 ---
 
@@ -67,10 +67,10 @@ cline "write a PyTorch training loop"
 Click the model name at the bottom of the Cline sidebar, scroll to **Model ID**, type the new model ID, and click **Done**.
 
 **Switching Models in CLI**
-cline auth -p openai-compatible -k jetstream -m Llama-4-Scout -b https://llm.jetstream-cloud.org/v1
+cline auth -p openai-compatible -k "$CLINE_API_KEY" -m Llama-4-Scout -b https://llm.jetstream-cloud.org/v1
 
 **Verifying API and Available Models**
-curl https://llm.jetstream-cloud.org/v1/models -H "Authorization: Bearer jetstream"
+curl https://llm.jetstream-cloud.org/v1/models -H "Authorization: Bearer $CLINE_API_KEY"
 
 ---
 
@@ -114,7 +114,7 @@ docker ps -a | grep jupyter- | awk '{print $1}' | xargs docker rm -f
 
 ## 🔐 Security Notes
 
-- Never commit your GitHub OAuth `client_secret` to the repository
+- Never commit your GitHub OAuth `client_secret` or `CLINE_API_KEY` to the repository
 - The `jupyterhub_config.py` in this repo uses placeholder values — real credentials are stored only on the VM
 - Each student container is fully isolated from others
 - HTTPS is enforced via Caddy with Let's Encrypt certificates

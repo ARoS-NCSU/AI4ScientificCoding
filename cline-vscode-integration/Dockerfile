@@ -10,11 +10,7 @@ RUN conda install -c conda-forge nodejs -y && \
     npm cache clean --force && \
     conda clean -afy
 
-RUN mkdir -p /home/jovyan/.cline/data/settings && \
-    echo '{"version":1,"lastUsedProvider":"openai-compatible","providers":{"openai-compatible":{"settings":{"provider":"openai-compatible","apiKey":"jetstream","model":"Kimi-K2.6","baseUrl":"https://llm.jetstream-cloud.org/v1"}}}}' \
-    > /home/jovyan/.cline/data/settings/providers.json && \
-    echo '{"welcomeViewCompleted":true,"clineVersion":"3.88.1","planModeApiProvider":"openai-compatible","actModeApiProvider":"openai-compatible","openAiBaseUrl":"https://llm.jetstream-cloud.org/v1","planModeOpenAiModelId":"Kimi-K2.6","actModeOpenAiModelId":"Kimi-K2.6","azureApiVersion":""}' \
-    > /home/jovyan/.cline/data/globalState.json
+# Cline settings are written at container startup from environment variables.
 
 RUN mkdir -p /home/jovyan/.jupyter && \
     echo 'c.ServerProxy.servers = {"vscode": {"command": ["code-server", "--auth", "none", "--bind-addr", "0.0.0.0:8080", "/home/jovyan"], "port": 8080, "launcher_entry": {"enabled": True, "title": "VS Code + Cline"}}}' \

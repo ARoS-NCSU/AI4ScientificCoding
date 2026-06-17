@@ -1,9 +1,48 @@
+# Start from the official Jupyter PyTorch notebook image with CUDA 12 support.
+# This provides JupyterLab, Python 3.12, PyTorch, and GPU-ready CUDA libraries
+# for each user container launched by DockerSpawner.
 FROM quay.io/jupyter/pytorch-notebook:cuda12-python-3.12
 
+# Switch to root so package installation, code-server setup, and cleanup can
+# modify system-level files inside the image.
 USER root
 
-COPY jupyter-ai /tmp/jupyter-ai
-RUN pip install --no-cache-dir "jupyter-ai>=3.0.0" /tmp/jupyter-ai && \
-    rm -rf /tmp/jupyter-ai
+# Install code-server so users can launch a browser-based VS Code workspace
+# from JupyterLab through jupyter-server-proxy.
+RUN curl -fsSL https://code-server.dev/install.sh | sh && \
+    mkdir -p /opt/code-server/extensions && \
+    code-server --extensions-dir /opt/code-server/extensions --install-extension saoudrizwan.claude-dev
 
+# Install Node.js for the Cline CLI and then install the CLI globally.
+RUN conda install -c conda-forge nodejs -y && \
+    npm install -g cline && \
+    npm cache clean --force && \
+    conda clean -afy
+
+# Copy notebook-side Python requirements and the local Jupyter AI persona/package
+# into the image, then install both. The requirements file installs Jupyter AI
+# and jupyter-server-proxy; the local package adds this course custom Jupyter AI
+# behavior and persona.
+COPY jupyterhub/notebook-requirements.txt /tmp/notebook-requirements.txt
+COPY jupyter-ai /tmp/jupyter-ai
+RUN pip install --no-cache-dir -r /tmp/notebook-requirements.txt /tmp/jupyter-ai && \
+    rm -rf /tmp/jupyter-ai /tmp/notebook-requirements.txt
+
+# Register a JupyterLab launcher entry that proxies code-server as
+# VS Code + Cline inside each user notebook server.
+RUN mkdir -p /home/jovyan/.jupyter
+COPY jupyterhub/jupyter_server_config.py /home/jovyan/.jupyter/jupyter_server_config.py
+
+# The startup script writes per-user Cline settings from environment variables
+# and starts code-server before the Jupyter single-user server launches.
+COPY cline-vscode-integration/start-code-server.sh /usr/local/bin/start-code-server.sh
+RUN chmod +x /usr/local/bin/start-code-server.sh && \
+    fix-permissions /home/jovyan && \
+    fix-permissions /opt/conda && \
+    fix-permissions /opt/code-server
+
+# Return to the default non-root notebook user expected by Jupyter Docker Stacks.
 USER ${NB_UID}
+
+# Useful when running the notebook image directly outside JupyterHub.
+CMD ["bash", "-lc", "/usr/local/bin/start-code-server.sh && exec start-notebook.py"]

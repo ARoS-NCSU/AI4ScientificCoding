@@ -10,3 +10,4 @@ venv/
 # Ignore build output
 dist/
 build/.env
+.env

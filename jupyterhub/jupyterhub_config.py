@@ -14,3 +14,6 @@ c.DockerSpawner.network_name = "jupyterhub-network"
 c.DockerSpawner.remove = False
 c.DockerSpawner.http_timeout = 300
 c.DockerSpawner.extra_host_config = {"runtime": "nvidia"}
+c.DockerSpawner.environment = {
+    "GITHUB_TOKEN": os.environ.get("GITHUB_TOKEN", "")
+}
