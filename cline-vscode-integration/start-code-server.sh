@@ -91,3 +91,13 @@ code-server \
   /home/jovyan &
 
 echo "code-server started (PID $!)"
+
+# Clone assignment repo in background
+(
+  mkdir -p /home/jovyan/assignments
+  if [ ! -d "/home/jovyan/assignments/hw01-foundations" ]; then
+    git clone https://qsamson:${GITHUB_TOKEN}@github.com/NCSU-NNDL-Spring26/hw01-foundations /home/jovyan/assignments/hw01-foundations
+  else
+    git -C /home/jovyan/assignments/hw01-foundations pull
+  fi
+) &
