@@ -101,3 +101,24 @@ echo "code-server started (PID $!)"
     git -C /home/jovyan/assignments/hw01-foundations pull
   fi
 ) &
+
+# Configure Marimo AI settings
+mkdir -p /home/jovyan/.config/marimo
+cat > /home/jovyan/.config/marimo/marimo.toml << 'MARIMO'
+[ai]
+enabled = true
+inline_tooltip = false
+mode = "agent"
+rules = ""
+[ai.custom_providers.jetstream]
+api_key = "jetstream"
+base_url = "https://llm.jetstream-cloud.org/v1"
+[ai.models]
+autocomplete_model = "jetstream/gpt-oss-120b"
+chat_model = "jetstream/gpt-oss-120b"
+custom_models = ["jetstream/gpt-oss-120b", "jetstream/Llama-4-Scout"]
+displayed_models = ["jetstream/gpt-oss-120b", "jetstream/Llama-4-Scout"]
+[completion]
+activate_on_typing = true
+copilot = "custom"
+MARIMO
