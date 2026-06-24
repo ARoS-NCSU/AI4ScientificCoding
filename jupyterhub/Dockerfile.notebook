@@ -48,5 +48,6 @@ USER ${NB_UID}
 CMD ["bash", "-lc", "/usr/local/bin/start-code-server.sh && exec start-notebook.py"]
 # Install Cline teaching assistant persona package
 USER root
-RUN pip install ./cline-persona && pip cache purge
+COPY cline-persona/ /tmp/cline-persona/
+RUN pip install /tmp/cline-persona && pip cache purge && rm -rf /tmp/cline-persona
 USER ${NB_UID}
