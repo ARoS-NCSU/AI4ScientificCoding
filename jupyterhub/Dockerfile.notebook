@@ -46,9 +46,7 @@ USER ${NB_UID}
 
 # Useful when running the notebook image directly outside JupyterHub.
 CMD ["bash", "-lc", "/usr/local/bin/start-code-server.sh && exec start-notebook.py"]
-
-# Install Marimo with AI features
+# Install Cline teaching assistant persona package
 USER root
-RUN pip install marimo[recommended] && \
-    pip cache purge
+RUN pip install ./cline-persona && pip cache purge
 USER ${NB_UID}

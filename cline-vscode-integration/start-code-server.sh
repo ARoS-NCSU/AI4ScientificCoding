@@ -122,3 +122,30 @@ displayed_models = ["jetstream/gpt-oss-120b", "jetstream/Llama-4-Scout"]
 activate_on_typing = true
 copilot = "custom"
 MARIMO
+
+# Configure Cline CLI defaults (fast mode, no verbose thinking)
+mkdir -p /home/jovyan/.config/cline
+cat > /home/jovyan/.config/cline/config.json << 'CLINE_CONFIG'
+{
+  "thinking": "none",
+  "autoApprove": true,
+  "compaction": "off"
+}
+CLINE_CONFIG
+
+# Create default .clinerules for concise responses
+cat > /home/jovyan/.clinerules << 'RULES'
+# Classroom Assistant Rules
+- Be concise and direct
+- Do not explore files unless specifically asked
+- Do not run verification commands after creating files unless asked
+- Do not provide lengthy summaries after completing tasks
+- Answer the question asked, nothing more
+- Do not read existing files to check conventions unless asked
+RULES
+
+# Apply Cline teaching assistant persona
+python3 -c "
+from ai4scientificcoding_cline_tutor.persona import GptOssClineTutorPersona
+GptOssClineTutorPersona().apply()
+"
