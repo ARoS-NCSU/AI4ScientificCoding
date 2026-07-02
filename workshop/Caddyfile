@@ -1,3 +1,0 @@
-ncstate-ai-workshop.nairr240257.projects.jetstream-cloud.org {
-    reverse_proxy jupyterhub:8000
-}
