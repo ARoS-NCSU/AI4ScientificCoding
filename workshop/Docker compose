@@ -1,0 +1,41 @@
+version: "3"
+services:
+  jupyterhub:
+    image: jupyterhub/jupyterhub:latest
+    container_name: jupyterhub
+    volumes:
+      - ./jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jupyterhub-data:/data
+    env_file: .env
+    networks:
+      - jupyterhub-network
+    ports:
+      - "8000:8000"
+    command: >
+      bash -c "pip install dockerspawner oauthenticator &&
+               jupyterhub -f /srv/jupyterhub/jupyterhub_config.py"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - jupyterhub-network
+    restart: unless-stopped
+
+networks:
+  jupyterhub-network:
+    external: true
+
+volumes:
+  jupyterhub-data:
+  caddy-data:
+  caddy-config:
