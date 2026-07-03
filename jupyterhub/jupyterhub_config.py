@@ -15,11 +15,11 @@ c.DockerSpawner.remove = False
 c.DockerSpawner.http_timeout = 300
 c.DockerSpawner.extra_host_config = {"runtime": "nvidia"}
 
-user_storage_volume_prefix = os.environ.get("JUPYTERHUB_USER_STORAGE_VOLUME_PREFIX", "jupyterhub-user")
+user_storage_root = os.environ.get("JUPYTERHUB_USER_STORAGE_ROOT", "/media/volume/jupyterhub/users")
 llm_log_volume = os.environ.get("JUPYTERHUB_LLM_LOG_VOLUME", "jupyterhub-llm-logs")
 
 c.DockerSpawner.volumes = {
-    f"{user_storage_volume_prefix}-{{username}}": "/home/jovyan/work",
+    f"{user_storage_root}/{{username}}": "/home/jovyan/work",
     llm_log_volume: "/var/log/llm-proxy",
 }
 

@@ -146,12 +146,19 @@ docker restart jupyterhub
 
 ## 💾 Persistent Storage and LLM Logging
 
-The notebook config now mounts two Docker volumes into each user container:
+The notebook config now mounts a host-path directory into each user container for persistent per-user workspaces:
 
-- `jupyterhub-user-{username}` at `/home/jovyan/work` for per-user notebooks and files
+- `/media/volume/jupyterhub/users/{username}` at `/home/jovyan/work` for per-user notebooks and files
 - `jupyterhub-llm-logs` at `/var/log/llm-proxy` for JSONL logs of prompts and model responses
 
-If you want those volumes to live on a Jetstream-attached disk, move Docker's `data-root` to the mounted VM path before starting the Hub. The workshop deployment shows that pattern in `workshop/README.md`.
+Before starting JupyterHub, create the base directory on the VM and mount it from the Jetstream volume, for example:
+
+```bash
+sudo mkdir -p /media/volume/jupyterhub/users
+sudo chown -R root:root /media/volume/jupyterhub
+```
+
+If you prefer Docker-managed named volumes instead, set `JUPYTERHUB_USER_STORAGE_ROOT` to a Docker volume root pattern before starting the Hub.
 
 ### Removing a User
 Simply remove their username from the list above and restart.
