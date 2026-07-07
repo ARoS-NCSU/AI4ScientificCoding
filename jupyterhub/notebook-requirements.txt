@@ -1,2 +1,6 @@
 jupyter-ai>=3.0.0
 jupyter-server-proxy
+marimo>=0.6.21
+jupyter-marimo-proxy
+langchain-openai
+pydantic-ai
