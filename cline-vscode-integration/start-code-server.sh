@@ -1,7 +1,7 @@
 #!/bin/bash
-# Start code-server and prepare Cline for a JupyterHub single-user container.
-# DockerSpawner runs this before the Jupyter single-user server starts so the
-# VS Code + Cline launcher is ready when the user opens JupyterLab.
+# Prepare Cline for a JupyterHub single-user container. DockerSpawner runs this
+# before the Jupyter single-user server starts; jupyter-server-proxy launches
+# code-server when the user clicks the VS Code + Cline launcher.
 set -euo pipefail
 
 # Jupyter Docker Stacks run notebook containers as the jovyan user. Set HOME and
@@ -80,17 +80,6 @@ PY
 if command -v cline >/dev/null 2>&1; then
   cline auth -p "${CLINE_API_PROVIDER}" -k "${CLINE_API_KEY}" -m "${CLINE_MODEL}" -b "${CLINE_BASE_URL}" || true
 fi
-
-# Start code-server in the background. JupyterLab reaches it through
-# jupyter-server-proxy using the launcher registered in jupyter_server_config.py.
-code-server \
-  --auth none \
-  --bind-addr 0.0.0.0:8080 \
-  --user-data-dir /home/jovyan/.local/share/code-server \
-  --extensions-dir /opt/code-server/extensions \
-  /home/jovyan &
-
-echo "code-server started (PID $!)"
 
 # Clone assignment repo in background
 (
