@@ -28,13 +28,22 @@ COPY jupyter-ai /tmp/jupyter-ai
 RUN pip install --no-cache-dir -r /tmp/notebook-requirements.txt /tmp/jupyter-ai && \
     rm -rf /tmp/jupyter-ai /tmp/notebook-requirements.txt
 
-# Register a JupyterLab launcher entry that proxies code-server as
-# VS Code + Cline inside each user notebook server.
-RUN mkdir -p /home/jovyan/.jupyter
-COPY jupyterhub/jupyter_server_config.py /home/jovyan/.jupyter/jupyter_server_config.py
+# Work around Marimo thinking-mode checks for the OpenAI-compatible Jetstream
+# provider used in the workshop environment.
+RUN sed -i \
+    -e 's/model\.profile\.supports_thinking/False/g' \
+    -e 's/model\.profile\.thinking_always_enabled/False/g' \
+    -e 's/if profile\.supports_thinking/if False/g' \
+    /opt/conda/lib/python3.12/site-packages/marimo/_server/ai/providers.py 2>/dev/null || true
+
+# Register JupyterLab launcher entries system-wide. The user home directory is
+# mounted by JupyterHub, so config baked into /home/jovyan can be hidden at
+# runtime.
+RUN mkdir -p /etc/jupyter
+COPY jupyterhub/jupyter_server_config.py /etc/jupyter/jupyter_server_config.py
 
 # The startup script writes per-user Cline settings from environment variables
-# and starts code-server before the Jupyter single-user server launches.
+# before the Jupyter single-user server launches.
 COPY cline-vscode-integration/start-code-server.sh /usr/local/bin/start-code-server.sh
 RUN chmod +x /usr/local/bin/start-code-server.sh && \
     fix-permissions /home/jovyan && \
